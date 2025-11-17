@@ -1,9 +1,9 @@
 """Weather API integration module using HG Brasil API."""
 
-import os
 import logging
 from typing import Optional
 import requests
+from multi_agent_chat.config import Config, DEFAULT_TIMEOUT
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -36,7 +36,7 @@ def obter_clima(city: str) -> str:
         return "Erro: Nome da cidade não pode ser vazio."
     
     # Get API key from environment variable
-    hg_key = os.getenv("HG_BRASIL_API_KEY")
+    hg_key = Config.get_hg_brasil_api_key()
     if not hg_key:
         logger.error("HG_BRASIL_API_KEY environment variable not set")
         return "Erro: Chave da API HG Brasil não configurada. Configure a variável de ambiente HG_BRASIL_API_KEY."
@@ -46,7 +46,7 @@ def obter_clima(city: str) -> str:
         params = {"key": hg_key, "city_name": city}
         
         logger.info(f"Fetching weather data for city: {city}")
-        response = requests.get(url, params=params, timeout=10)
+        response = requests.get(url, params=params, timeout=DEFAULT_TIMEOUT)
         response.raise_for_status()
         
         data = response.json()

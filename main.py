@@ -7,8 +7,10 @@ with all agents in a single conversation.
 """
 
 import logging
+import sys
 from autogen import ConversableAgent, UserProxyAgent, GroupChat, GroupChatManager, register_function
 from multi_agent_chat.weather_tool import obter_clima
+from multi_agent_chat.config import Config, DEFAULT_LLM_TEMPERATURE, DEFAULT_MAX_ROUNDS
 from dotenv import load_dotenv
 from autogen.oai.openai_utils import config_list_from_dotenv
 
@@ -22,10 +24,16 @@ logger = logging.getLogger(__name__)
 # Load environment variables from .env file
 load_dotenv()
 
+# Validate configuration before proceeding
+if not Config.validate_required_keys():
+    logger.error("Missing required API keys. Please check your .env file.")
+    logger.error("Copy .env.example to .env and add your API keys.")
+    sys.exit(1)
+
 # LLM Configuration for all agents
 llm_config = {
     "config_list": config_list_from_dotenv(),
-    "temperature": 0.7
+    "temperature": DEFAULT_LLM_TEMPERATURE
 }
 
 # Weather Agent - Specialized in meteorology and weather forecasts
@@ -85,7 +93,7 @@ group_chat = GroupChat(
     agents=[user_proxy, clima_agent, futebol_agent, politica_agent],
     speaker_selection_method="auto",
     select_speaker_auto_llm_config=llm_config,
-    max_round=10
+    max_round=DEFAULT_MAX_ROUNDS
 )
 logger.info("Group chat configured with all agents")
 
